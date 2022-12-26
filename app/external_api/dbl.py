@@ -16,13 +16,11 @@ dbl_api = api(HOST, HEADERS)
 
 
 def get_bot_server_count(bot_id: int):
-    result = dbl_api('get', f'bots/{bot_id}/stats')
-    return result
+    return dbl_api('get', f'bots/{bot_id}/stats')
 
 
 def post_bot_server_count(bot_id: int, server_cnt: int):
     payload = {
         "server_count": server_cnt
     }
-    result = dbl_api('post', f'bots/{bot_id}/stats', payload)
-    return result
+    return dbl_api('post', f'bots/{bot_id}/stats', payload)

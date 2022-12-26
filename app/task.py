@@ -54,9 +54,7 @@ class BotTask(commands.Cog):
         station = Stations()
         loop = asyncio.get_event_loop()
         stat_info_dict = await loop.run_in_executor(ThreadPoolExecutor(), station.update_station_status)
-        stats_fmt = ""
-        for k, v in stat_info_dict.items():
-            stats_fmt += f"• {k}: {v}\n"
+        stats_fmt = "".join(f"• {k}: {v}\n" for k, v in stat_info_dict.items())
         await channel.send(f"URL radio stream status:\n```{stats_fmt}```")
 
     @update_station_stat.before_loop
@@ -74,12 +72,11 @@ class BotTask(commands.Cog):
         channel = self.bot.get_channel(RADIOID_SERVER_CHANNEL_ID)
         playing = Playing()
 
-        playing_fmt = ""
         all_play = playing.get_all_play().copy()
-        for _, v in all_play.items():
-            playing_fmt += f"• {v['guild_name']}: {v['station']}\n"
-
-        if playing_fmt == "":
+        playing_fmt = "".join(
+            f"• {v['guild_name']}: {v['station']}\n" for _, v in all_play.items()
+        )
+        if not playing_fmt:
             playing_fmt = "🕸️"
 
         await channel.send(f"Playing on {get_emoji_by_number(playing.get_play_count())} servers:\n```{playing_fmt}```")

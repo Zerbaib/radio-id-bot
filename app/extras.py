@@ -30,30 +30,6 @@ class Extras(commands.Cog):
         await ctx.send("Ksoft lyrics API is down, please try again later :(")
         return
 
-        resp, info = ksoft.get_lyrics(query)
-        if info["status_code"] == 500:
-            await ctx.send("Gagal mendapatkan lyric :cry:")
-            return
-
-        if info["status_code"] == 404:
-            await ctx.send("Lagu yang dicari tidak ditemukan :x:\ncoba ganti lagu lain")
-            return
-
-        if not resp["data"]:
-            await ctx.send("Gagal mengekstrak lyric :x:")
-            return
-
-        top_result = resp["data"][0]
-        song = f"{top_result['artist']} - {top_result['name']}"
-        lyrics = top_result["lyrics"]
-        if len(lyrics) > 2048:
-            lyrics = f"{lyrics[:2040]} ..."
-
-        embed = discord.Embed(title=song, description=lyrics)
-        embed.set_footer(text="Lyrics provided by KSoft.Si")
-        await ctx.send(embed=embed)
-        return
-
     @commands.guild_only()
     @commands.command("ping")
     async def _ping(self, ctx):
