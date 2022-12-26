@@ -16,5 +16,4 @@ ksoft_api = api(HOST, HEADERS)
 
 
 def get_lyrics(query: str):
-    result = ksoft_api('get', f'lyrics/search?q={query}&limit=1')
-    return result
+    return ksoft_api('get', f'lyrics/search?q={query}&limit=1')

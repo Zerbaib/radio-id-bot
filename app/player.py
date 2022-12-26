@@ -85,7 +85,7 @@ class RadioPlayer(commands.Cog):
 
         self.stations.reload_station_list()
         stations_dict = self.stations.get_stations()
-        stations_list = [k for k in stations_dict.keys()]
+        stations_list = list(stations_dict.keys())
 
         stations_fmt = ""
         for station_name, station_attr in stations_dict.items():

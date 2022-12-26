@@ -63,7 +63,7 @@ class Stations:
         if loaded_stations is None:
             self.stations = {}
             return
-        station_name_list = [k for k in loaded_stations.keys()]
+        station_name_list = list(loaded_stations.keys())
 
         # handle removed station
         for station_name in list(self.stations.keys()):
@@ -93,11 +93,7 @@ class Stations:
         try:
             req = urlopen(url, timeout=2, context=ctx)
             stat = req.getcode()
-        except HTTPError as e:
-            stat = str(e)
-        except URLError as e:
-            stat = str(e)
-        except Exception as e:
+        except (HTTPError, Exception) as e:
             stat = str(e)
         return stat
 
@@ -137,13 +133,7 @@ class Playing:
 
 
 def generate_random_string(n=10):
-    r = ''.join(
-        random.choices(
-            string.ascii_uppercase + string.digits,
-            k=n
-        )
-    )
-    return r
+    return ''.join(random.choices(string.ascii_uppercase + string.digits, k=n))
 
 
 def chunk_list(seq, num):
@@ -169,16 +159,14 @@ class DummyGuilds:
 
 
 def dummy_guilds(n=10):
-    guilds = []
-    for i in range(n):
-        guilds.append(
-            DummyGuilds(
-                i,
-                generate_random_string(random.randint(5, 10)),
-                random.randint(10, 1000)
-            )
+    return [
+        DummyGuilds(
+            i,
+            generate_random_string(random.randint(5, 10)),
+            random.randint(10, 1000),
         )
-    return guilds
+        for i in range(n)
+    ]
 
 
 def get_emoji_by_number(num):
@@ -193,17 +181,11 @@ def get_emoji_by_number(num):
 
 
 def get_number_by_emoji(emoji):
-    for k, v in EMOJI_NUMBER.items():
-        if str(emoji) == v:
-            return k
-    return None
+    return next((k for k, v in EMOJI_NUMBER.items() if str(emoji) == v), None)
 
 
 def get_page(current_page, emoji):
-    if str(emoji) == '⏩':
-        return current_page + 1
-    else:
-        return current_page - 1
+    return current_page + 1 if str(emoji) == '⏩' else current_page - 1
 
 
 def is_valid_url(url):
@@ -218,7 +200,7 @@ def is_valid_url(url):
     ipv6_re = r'\[[0-9a-f:.]+\]'  # (simple regex, validated later)
 
     # Host patterns
-    hostname_re = r'[a-z' + ul + r'0-9](?:[a-z' + ul + r'0-9-]{0,61}[a-z' + ul + r'0-9])?'
+    hostname_re = f'[a-z{ul}0-9](?:[a-z{ul}' + r'0-9-]{0,61}[a-z' + ul + r'0-9])?'
     # Max length for domain name labels is 63 characters per RFC 1034 sec. 3.1
     domain_re = r'(?:\.(?!-)[a-z' + ul + r'0-9-]{1,63}(?<!-))*'
     tld_re = (
@@ -229,7 +211,7 @@ def is_valid_url(url):
         r'(?<!-)'                            # can't end with a dash
         r'\.?'                               # may have a trailing dot
     )
-    host_re = '(' + hostname_re + domain_re + tld_re + '|localhost)'
+    host_re = f'({hostname_re}{domain_re}{tld_re}|localhost)'
 
     regex = re.compile(
         r'^(?:[a-z0-9.+-]*)://'  # scheme is validated separately
@@ -259,13 +241,12 @@ def split_to_columns(text):
         # append space to make it equal with longest line
         if len_left_line < max_len or len_right_line < max_len:
             left_line = left_line + " " * (max_len - len_left_line)
-            right_lane = right_lane + " " * (max_len - len_right_line)
+            right_lane += " " * (max_len - len_right_line)
 
         per_line = "   ".join([left_line, right_lane])
         column.append(per_line)
 
-    column_text = "\n".join(column)
-    return column_text
+    return "\n".join(column)
 
 
 def split_to_list(text: str, max_len: int = 1000):
@@ -309,11 +290,11 @@ def convert_size(size_bytes):
     i = int(math.floor(math.log(size_bytes, 1024)))
     p = math.pow(1024, i)
     s = round(size_bytes / p, 2)
-    return "%s %s" % (s, size_name[i])
+    return f"{s} {size_name[i]}"
 
 
 def run_sys_info():
-    sys_name = ' '.join([x for x in distro.linux_distribution()])
+    sys_name = ' '.join(list(distro.linux_distribution()))
 
     total_cpu = psutil.cpu_count()
     cpu_usage_overall = psutil.cpu_percent(interval=1)
@@ -398,30 +379,24 @@ class GuildInfo():
     def extract_guild_obj(self, is_detailed=False):
         extracted_guild_info = ""
         extracted_guild_detail_info = ""
-        num = 1
-        for guild in self.guild_obj:
+        for num, guild in enumerate(self.guild_obj, start=1):
             extracted_guild_info += f'{num},"{guild.name}",{guild.member_count},{guild.id}\n'
 
             extracted_guild_detail_info += f'{num},"{guild.name}",{guild.member_count},{guild.id},'
             extracted_guild_detail_info += f'"{guild.created_at}","{guild.region}",{guild.bitrate_limit},'
             extracted_guild_detail_info += f'"{guild.me.nick}","{list_to_csv([x.name for x in guild.me.roles])}",'
             extracted_guild_detail_info += f'"{guild.preferred_locale}",{guild.premium_tier},"{guild.icon_url}",'
-            extracted_guild_detail_info += f'"{list_to_csv([x for x in guild.features])}",'
+            extracted_guild_detail_info += f'"{list_to_csv(list(guild.features))}",'
             extracted_guild_detail_info += f'"{list_to_csv([x.name for x in guild.roles])}",'
             extracted_guild_detail_info += f'"{list_to_csv([x.name for x in guild.text_channels])}",'
             extracted_guild_detail_info += f'"{list_to_csv([x.name for x in guild.voice_channels])}"\n'
-
-            num += 1
 
         if is_detailed is True:
             return extracted_guild_detail_info
         return extracted_guild_info
 
     def get_total_guild_member(self):
-        total_member = 0
-        for guild in self.guild_obj:
-            total_member += guild.member_count
-        return total_member
+        return sum(guild.member_count for guild in self.guild_obj)
 
     def generate_report_csv(self, params):
         total_guild = len(self.guild_obj)

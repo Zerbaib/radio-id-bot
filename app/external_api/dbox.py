@@ -25,17 +25,16 @@ def upload_file(file, filename):
     payload = file
 
     dbox_api = api(CONTENT_HOST, headers)
-    result = dbox_api('post', 'files/upload', payload, False)
-    return result
+    return dbox_api('post', 'files/upload', payload, False)
 
 
 def create_share_link(file_path):
     payload = f'{{"path": "{file_path}"}}'
-    result = dbox_api('post', 'sharing/create_shared_link_with_settings', payload, False)
-    return result
+    return dbox_api(
+        'post', 'sharing/create_shared_link_with_settings', payload, False
+    )
 
 
 def get_link(file_id):
     payload = f'{{"path": "{file_id}"}}'
-    result = dbox_api('post', 'sharing/list_shared_links', payload, False)
-    return result
+    return dbox_api('post', 'sharing/list_shared_links', payload, False)

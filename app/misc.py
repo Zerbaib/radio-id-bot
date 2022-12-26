@@ -26,11 +26,11 @@ class Misc(commands.Cog):
         Change status of this bot (owner only)
         """
 
-        if not status:
-            status = f"`{self.prefix} help` untuk memulai."
-        else:
-            status = " ".join(status[:])
-
+        status = (
+            " ".join(status[:])
+            if status
+            else f"`{self.prefix} help` untuk memulai."
+        )
         await self.self.bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name=status))
 
         await ctx.send(f"Status changed to:\n{status}")
@@ -63,9 +63,8 @@ class Misc(commands.Cog):
         await ctx.send("List of servers:")
         total_member = 0
         num = 1
-        page = 1
         guild_table = {}
-        for guilds in chunk_guild:
+        for page, guilds in enumerate(chunk_guild, start=1):
             guild_list = []
             for guild in guilds:
                 guild_list.append([num, guild.name, guild.member_count])
@@ -73,8 +72,6 @@ class Misc(commands.Cog):
                 num += 1
             formatted_guilds = f'```{tabulate(guild_list, tablefmt="fancy_grid")}```'
             guild_table[page] = formatted_guilds
-            page += 1
-
         total_page = len(guild_table)
         current_page = 1
 
@@ -187,9 +184,7 @@ class Misc(commands.Cog):
             await ctx.send("Fix your ping command, eg: ping google.com 4")
             return
 
-        if times > 50:
-            times = 50
-
+        times = min(times, 50)
         await ctx.send(f"Start pinging to {host} {times} times ...")
         loop = asyncio.get_event_loop()
         s_ping = await loop.run_in_executor(ThreadPoolExecutor(), functools.partial(run_ping, host, times))
